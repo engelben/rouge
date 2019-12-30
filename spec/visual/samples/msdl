@@ -1,0 +1,8 @@
+scenario traffic.overtake:
+    v1: car
+    v2: car
+      side: av_left_right                    # Is the overtake from the left or the right
+    do parallel:               # Actual behavior
+      cover(side)
+      cover(min_ttc(v1, v2), name: min_time_to_collision, unit: millisecond, range: [0..3000], every: 100) # Comment
+      cover([side, min_time_to_collision]) # Comment

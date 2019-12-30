@@ -1,0 +1,6 @@
+scenario overtake_serial:
+    car_a: car
+    car_b: car   
+    do serial:
+       overtake(v1: car_a, v2: dut.car)
+       overtake(v1: car_b, v2: dut.car)
