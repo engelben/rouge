@@ -123,6 +123,7 @@ module Rouge
           token Punctuation
           push :brackets
         end
+        rule %r/\.\./, Punctuation
         rule %r/[\[\]){}.,:;\\\@]/, Punctuation
 
       end
@@ -130,7 +131,7 @@ module Rouge
       state :commentOrIgnore do
         rule(/COMPILER_SKIP_FILE.*/m, Comment::Special, :pop!)
 	rule(/COMPILER_IGNORE_BEGIN.*#COMPILER_IGNORE_END/m, Comment::Special, :pop!)
-	rule(/.*(?=\n)/, Comment::Single, :pop!)
+	rule(/.*$/, Comment::Single, :pop!)
       end
 
       state :string do
@@ -154,6 +155,7 @@ module Rouge
 	end
 	rule(/\)/, Punctuation, :pop!)
 
+        rule %r/\.\./, Punctuation
         rule %r/[\[\]{}.,:;\@]/, Punctuation
         rule %r/(and|or)\b/, Operator::Word
         rule %r/[\~\!\?\$\*\/\+\-\<\>\=\&\^\%|]|!=/, Operator
@@ -291,7 +293,7 @@ module Rouge
           parseIdentifier(m[3], getTokenByScope())
         end
 
-        rule(/((?: *\n)+)( *)(#{identifier})\:( *)(#{identifier})\./) do |m|
+        rule(/((?: *\n)+)( *)(#{identifier})\:( *)(#{identifier})\.(?!\.)/) do |m|
           token Text::Whitespace, m[1]
           updateIndentStack(m[2].length, @@indents)
           token Text::Whitespace, m[2]
@@ -307,7 +309,7 @@ module Rouge
         end
 
 
-        rule(/((?: *\n)+)( *)(#{identifier})\./) do |m|
+        rule(/((?: *\n)+)( *)(#{identifier})\.(?!\.)/) do |m|
           token Text::Whitespace, m[1]
           updateIndentStack(m[2].length, @@indents)
           token Text::Whitespace, m[2]
@@ -329,7 +331,7 @@ module Rouge
 
       state :do do
         rule %r/ /, Text::Whitespace
-        rule(/#{identifier}(?=\.)/) do |m|
+        rule(/#{identifier}(?=\.[^\.])/) do |m|
           goto :path
           parseIdentifier(m[0], Name)
         end
@@ -380,7 +382,7 @@ module Rouge
       end
 
       state :path do
-        rule(/#{identifier}(?=\.)/) do |m|
+        rule(/#{identifier}(?=\.[^\.])/) do |m|
           parseIdentifier(m[0], Name)
         end
         rule %r/\./, Punctuation
@@ -433,6 +435,7 @@ module Rouge
         end
         mixin :label
         mixin :scopeDependantIdentifier
+        rule %r/\.\./, Punctuation
         rule %r/[\[\]{}.,:;\@]/, Punctuation
         mixin :whitespace
       end
